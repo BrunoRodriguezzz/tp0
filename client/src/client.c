@@ -29,8 +29,13 @@ int main(void)
 	// Usando el config creado previamente, leemos los valores del config y los 
 	// dejamos en las variables 'ip', 'puerto' y 'valor'
 
+	valor = config_get_string_value(config, "CLAVE");
+	ip = config_get_string_value(config, "IP"); // Para mostrarlo con el log deberia tener un char* siempre
+	puerto = config_get_string_value(config, "PUERTO");
+
 	// Loggeamos el valor de config
 
+	log_info(logger, ip);
 
 	/* ---------------- LEER DE CONSOLA ---------------- */
 
@@ -66,6 +71,8 @@ t_log* iniciar_logger(void)
 t_config* iniciar_config(void)
 {
 	t_config* nuevo_config;
+
+	nuevo_config = config_create("cliente.config");
 
 	return nuevo_config;
 }
