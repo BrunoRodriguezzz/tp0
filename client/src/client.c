@@ -38,8 +38,9 @@ int main(void)
 	log_info(logger, ip);
 
 	/* ---------------- LEER DE CONSOLA ---------------- */
+	t_list* leidos = list_create();
 
-	leer_consola(logger);
+	leidos = leer_consola(logger);
 
 	/*---------------------------------------------------PARTE 3-------------------------------------------------------------*/
 
@@ -50,12 +51,15 @@ int main(void)
 
 	// Enviamos al servidor el valor de CLAVE como mensaje
 
+	enviar_mensaje(valor, conexion);
+
 	// Armamos y enviamos el paquete
-	paquete(conexion);
+	paquete(conexion, leidos);
 
 	terminar_programa(conexion, logger, config);
 
 	/*---------------------------------------------------PARTE 5-------------------------------------------------------------*/
+
 	// Proximamente
 }
 
@@ -77,31 +81,43 @@ t_config* iniciar_config(void)
 	return nuevo_config;
 }
 
-void leer_consola(t_log* logger)
+t_list* leer_consola(t_log* logger)
 {
 	char* leido;
+	t_list* itemsLeidos = list_create();
 
 	// La primera te la dejo de yapa
 	leido = readline("> ");
 
 	// El resto, las vamos leyendo y logueando hasta recibir un string vacío
-
+	while(strcmp(leido, "") != 0) { //Me puso algo en la consola.
+		log_info(logger, leido);
+		list_add(itemsLeidos, leido);
+		leido = readline("> ");
+	}
+	free(leido);
 
 	// ¡No te olvides de liberar las lineas antes de regresar!
-
+	return itemsLeidos;
 }
 
-void paquete(int conexion)
+void paquete(int conexion, t_list* leidos)
 {
 	// Ahora toca lo divertido!
-	char* leido;
-	t_paquete* paquete;
+	t_paquete* paquete = crear_paquete(); // Creo el paquete.
+	char* linea;
 
 	// Leemos y esta vez agregamos las lineas al paquete
 
+	for (int i = 0; i < list_size(leidos); i++)
+	{
+		linea = list_get(leidos, i);
+		agregar_a_paquete(paquete, linea, strlen(linea)+1);
+	}
+	enviar_paquete(paquete, conexion);
 
 	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
-	
+	list_destroy_and_destroy_elements(leidos, free); // Libero la lista con sus elementos.
 }
 
 void terminar_programa(int conexion, t_log* logger, t_config* config)
